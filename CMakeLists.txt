@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 # Project name and language
-project(project_name_here 
+project(waybar_weather 
     LANGUAGES C CXX
     VERSION 1.0.0
 )
