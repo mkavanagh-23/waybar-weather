@@ -8,6 +8,20 @@
 #include <tuple>
 #include <ctime>
 
+class Location {
+public:
+  std::string country;
+  std::string region;
+  std::string city;
+  std::string zip;
+  std::string timezone;
+  std::string ip;
+  double latitude;
+  double longitude;
+};
+
+Location parseLocation(const Json::Value& parsedData);
+
 namespace cURL {
 
 enum class Result {
