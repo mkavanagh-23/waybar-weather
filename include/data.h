@@ -3,6 +3,7 @@
 
 #include <curl/curl.h>
 #include <json/json.h>
+#include <ostream>
 #include <string>
 #include <vector>
 #include <tuple>
@@ -18,6 +19,9 @@ public:
   std::string ip;
   double latitude;
   double longitude;
+
+  Location(const Json::Value& parsedLocation);
+  friend std::ostream& operator<<(std::ostream& out, const Location& location);
 };
 
 Location parseLocation(const Json::Value& parsedData);
