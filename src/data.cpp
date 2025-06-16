@@ -1,48 +1,12 @@
 #include "data.h"
 #include <ctime>
 #include <iostream>
-#include <ostream>
 #include <string>
 #include <vector>
 #include <tuple>
 #include <cstdlib>
 #include <curl/curl.h>
 #include <json/json.h>
-
-Location::Location(const Json::Value& parsedLocation)
-{
-  if(parsedLocation.isMember("country")) {
-    country = parsedLocation["country"].asString();
-  }
-  if(parsedLocation.isMember("region")) {
-    region = parsedLocation["region"].asString();
-  }
-  if(parsedLocation.isMember("city")) {
-    city = parsedLocation["city"].asString();
-  }
-  if(parsedLocation.isMember("zip")) {
-    zip = parsedLocation["zip"].asString();
-  }
-  if(parsedLocation.isMember("timezone")) {
-    timezone = parsedLocation["timezone"].asString();
-  }
-  if(parsedLocation.isMember("lat")) {
-    latitude = parsedLocation["lat"].asDouble();
-  }
-  if(parsedLocation.isMember("lon")) {
-    longitude = parsedLocation["lon"].asDouble();
-  }
-  if(parsedLocation.isMember("query")) {
-    ip = parsedLocation["query"].asString();
-  }
-}
-
-std::ostream& operator<<(std::ostream& out, const Location& location){
-  out << "Location (" << location.ip << "):\n"
-      << location.city << ", " << location.region << " | " << location.country << ' ' << location.zip << '\n'
-      << '(' << location.latitude << ", " << location.longitude << ")\n";
-  return out;
-}
 
 namespace cURL {
 
@@ -80,8 +44,14 @@ std::tuple<Result, std::string, std::vector<std::string>> getData(const std::str
   curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &responseData);     // Set the data to write
   curl_easy_setopt(curl.get(), CURLOPT_TIMEOUT, 10L); // Set a 10 second timeout
   curl_easy_setopt(curl.get(), CURLOPT_SSL_VERIFYPEER, 0L); // Optional, depending on your SSL setup
-  curl_easy_setopt(curl.get(), CURLOPT_USERAGENT, std::getenv("USER_AGENT")); // Set the custom user agent (required for api.weather.gov)
   
+  // Check for user agent
+  const char* USER_AGENT = std::getenv("USER_AGENT");
+  if(USER_AGENT != nullptr) {
+    std::cout << "User Agent: '" << USER_AGENT << "'\n";
+    curl_easy_setopt(curl.get(), CURLOPT_USERAGENT, USER_AGENT); // Set the custom user agent (required for api.weather.gov)
+  }
+
   // Set the cookies location
   curl_easy_setopt(curl.get(), CURLOPT_COOKIEFILE, "");     // Enable in-memory cookie management
   

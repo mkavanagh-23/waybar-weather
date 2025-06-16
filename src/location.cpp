@@ -4,6 +4,41 @@
 #include <iostream>
 #include <optional>
 
+Location::Location(const Json::Value& parsedLocation)
+{
+  if(parsedLocation.isMember("country")) {
+    country = parsedLocation["country"].asString();
+  }
+  if(parsedLocation.isMember("region")) {
+    region = parsedLocation["region"].asString();
+  }
+  if(parsedLocation.isMember("city")) {
+    city = parsedLocation["city"].asString();
+  }
+  if(parsedLocation.isMember("zip")) {
+    zip = parsedLocation["zip"].asString();
+  }
+  if(parsedLocation.isMember("timezone")) {
+    timezone = parsedLocation["timezone"].asString();
+  }
+  if(parsedLocation.isMember("lat")) {
+    latitude = parsedLocation["lat"].asDouble();
+  }
+  if(parsedLocation.isMember("lon")) {
+    longitude = parsedLocation["lon"].asDouble();
+  }
+  if(parsedLocation.isMember("query")) {
+    ip = parsedLocation["query"].asString();
+  }
+}
+
+std::ostream& operator<<(std::ostream& out, const Location& location){
+  out << "Location (" << location.ip << "):\n"
+      << location.city << ", " << location.region << " | " << location.country << ' ' << location.zip << '\n'
+      << '(' << location.latitude << ", " << location.longitude << ")\n";
+  return out;
+}
+
 std::optional<Location> getLocation() {
   cURL::Handle handle;
   std::string requestURL{ "http://ip-api.com/json" };

@@ -1,4 +1,3 @@
-#include "data.h"
 #include "location.h"
 #include "weather.h"
 #include <cstdlib>
@@ -8,7 +7,6 @@
 #include <utility>
 
 int main() {
-  std::cout << "User Agent: " << std::getenv("USER_AGENT");
   std::optional<Location> locationRet = getLocation();
   if(!locationRet.has_value()) {
     std::cerr << "ERROR: Unable to retrieve location.";
