@@ -26,8 +26,8 @@ std::optional<std::string> getWeather(std::pair<double, double> coordinates) {
     std::cerr << "ERROR: Failed to retrieve data for given coordinates.\n";
     return std::nullopt;
   }
-  auto [stationsURL, gridpointsURL] = *pointsRet;
-  std::cout << stationsURL << '\n' << gridpointsURL << '\n';
+  auto [stationsURL, forecastURL] = *pointsRet;
+  std::cout << "Stations URL: " << stationsURL << '\n' << "Forecast URL: " << forecastURL << '\n';
   // TODO: 
   // GET request to stationsURL
   //    Extract each listed station's ID and Coordinates
@@ -36,6 +36,8 @@ std::optional<std::string> getWeather(std::pair<double, double> coordinates) {
   //    Use the returned ID to make a request to observations/latest
   //    Parse data from current conditions
   // GET request to gridpointsURL/forecast/hourly
+  getStationsData(stationsURL, handle);
+  getForecastData(forecastURL, handle);
   return std::nullopt;
 };
 
@@ -68,4 +70,40 @@ std::optional<std::pair<std::string, std::string>> getPointsData(std::pair<doubl
   }
   std::cerr << "ERROR: Failed to parse properties element from points data.\n";
   return std::nullopt;
+}
+
+void getStationsData(const std::string& stationsURL, cURL::Handle& curl) {
+  auto [result, data, headers] = cURL::getData(stationsURL, curl);
+  if(result != cURL::Result::SUCCESS) {
+    std::cerr << "ERROR: cURL request failes.\n";
+    return;
+  }
+  if(data.empty()) {
+    std::cerr << "ERROR: Retrieved stations data string is empty.\n";
+    return;
+  }
+  std::string contentType = cURL::getContentType(headers);
+  if(contentType.find("application/geo+json") == std::string::npos) {
+    std::cerr << "ERROR: API returned unexpected format.\n";
+    return;
+  }
+  std::cout << "Station data: " << data << '\n';
+}
+
+void getForecastData(const std::string& forecastURL, cURL::Handle& curl) {
+  auto [result, data, headers] = cURL::getData(forecastURL, curl);
+  if(result != cURL::Result::SUCCESS) {
+    std::cerr << "ERROR: cURL request failes.\n";
+    return;
+  }
+  if(data.empty()) {
+    std::cerr << "ERROR: Retrieved forecast data string is empty.\n";
+    return;
+  }
+  std::string contentType = cURL::getContentType(headers);
+  if(contentType.find("application/geo+json") == std::string::npos) {
+    std::cerr << "ERROR: API returned unexpected format.\n";
+    return;
+  }
+  std::cout << "Forecast data: " << data << '\n';
 }
