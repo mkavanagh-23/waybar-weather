@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <tuple>
+#include <cstdlib>
 #include <curl/curl.h>
 #include <json/json.h>
 
@@ -79,6 +80,7 @@ std::tuple<Result, std::string, std::vector<std::string>> getData(const std::str
   curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &responseData);     // Set the data to write
   curl_easy_setopt(curl.get(), CURLOPT_TIMEOUT, 10L); // Set a 10 second timeout
   curl_easy_setopt(curl.get(), CURLOPT_SSL_VERIFYPEER, 0L); // Optional, depending on your SSL setup
+  curl_easy_setopt(curl.get(), CURLOPT_USERAGENT, std::getenv("USER_AGENT")); // Set the custom user agent (required for api.weather.gov)
   
   // Set the cookies location
   curl_easy_setopt(curl.get(), CURLOPT_COOKIEFILE, "");     // Enable in-memory cookie management
