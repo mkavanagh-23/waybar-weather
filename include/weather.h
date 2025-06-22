@@ -8,10 +8,10 @@
 #include <utility>
 
 
-std::optional<std::string> getWeather(std::pair<double, double> coordinates);
-std::optional<std::pair<std::string, std::string>> getPointsData(std::pair<double, double> coordinates, cURL::Handle& curl);
-void getCurrentConditions(std::string stationID, cURL::Handle& curl);
-void getClosestStation(const std::string& stationsURL, cURL::Handle& curl);
+std::optional<std::string> getWeather(const std::pair<double, double>& coordinates);
+std::optional<std::pair<std::string, std::string>> getPointsData(const std::pair<double, double>& coordinates, cURL::Handle& curl);
+void getCurrentConditions(const std::string& stationsURL, cURL::Handle& curl);
+std::optional<std::string> getClosestStation(const std::string& stationsURL, cURL::Handle& curl);
 std::optional<Json::Value> getStationsData(const std::string& stationsURL, cURL::Handle& curl);
 void getForecastData(const std::string& forecastURL, cURL::Handle& curl);
 

@@ -19,7 +19,7 @@
 #include <iostream>
 #include <optional>
 
-std::optional<std::string> getWeather(std::pair<double, double> coordinates) {
+std::optional<std::string> getWeather(const std::pair<double, double>& coordinates) {
   cURL::Handle handle;  // This handle to be utilized for all subsequent function calls
   auto pointsRet = getPointsData(coordinates, handle);
   if(!pointsRet.has_value()) {
@@ -28,6 +28,7 @@ std::optional<std::string> getWeather(std::pair<double, double> coordinates) {
   }
   auto [stationsURL, forecastURL] = *pointsRet;
   std::cout << "Stations URL: " << stationsURL << '\n' << "Forecast URL: " << forecastURL << '\n';
+  
   // TODO: 
   // GET request to stationsURL
   //    Extract each listed station's ID and Coordinates
@@ -36,12 +37,13 @@ std::optional<std::string> getWeather(std::pair<double, double> coordinates) {
   //    Use the returned ID to make a request to observations/latest
   //    Parse data from current conditions
   // GET request to gridpointsURL/forecast/hourly
-  getClosestStation(stationsURL, handle);
+  
+  getCurrentConditions(stationsURL, handle);
   getForecastData(forecastURL, handle);
   return std::nullopt;
 };
 
-std::optional<std::pair<std::string, std::string>> getPointsData(std::pair<double, double> coordinates, cURL::Handle& curl){
+std::optional<std::pair<std::string, std::string>> getPointsData(const std::pair<double, double>& coordinates, cURL::Handle& curl){
   std::string url{ "https://api.weather.gov/points/" + std::to_string(coordinates.first) + ',' + std::to_string(coordinates.second) };
   auto [result, data, headers] = cURL::getData(url, curl);
   
@@ -72,27 +74,37 @@ std::optional<std::pair<std::string, std::string>> getPointsData(std::pair<doubl
   return std::nullopt;
 }
 
-void getCurrentConditions(std::string stationID, cURL::Handle& curl) {
-  // Make an HTTTP request
+void getCurrentConditions(const std::string& stationsURL, cURL::Handle& curl) {
+  // Get the closest station ID
+  auto closestRet = getClosestStation(stationsURL, curl);
+  if(!closestRet.has_value())
+    return;
+  std::string stationID = *closestRet;
+
+  // Make an HTTTP request for the closest station
   // Parse the data for current conditions
 
 }
 
-void getClosestStation(const std::string& stationsURL, cURL::Handle& curl) {
+std::optional<std::string> getClosestStation(const std::string& stationsURL, cURL::Handle& curl) {
   // Get stations data
   auto stationsRet = getStationsData(stationsURL, curl);
   if(!stationsRet.has_value()) {
     std::cerr << "ERROR: Stations request request failed.\n";
-    return;
+    return std::nullopt;
   }
   Json::Value parsedData = *stationsRet;
   // Enter into the 'features' (stations) array
-  const Json::Value& stations = parsedData["features"];
+  //const Json::Value& stations = parsedData["features"];
   // Iterate through each station
-  for(const auto& station : stations) {
+  //for(const auto& station : stations) {
+    // Calculate the distance from our current coordinates
+    // We can outsource this to another function using the haversine equation
+    // Store the ID with the smallest distance value
   
-  }
+  //}
   // Return the closest station's ID
+  return std::nullopt;
 }
 
 std::optional<Json::Value> getStationsData(const std::string& stationsURL, cURL::Handle& curl) {
