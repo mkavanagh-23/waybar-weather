@@ -48,7 +48,6 @@ std::tuple<Result, std::string, std::vector<std::string>> getData(const std::str
   // Check for user agent
   const char* USER_AGENT = std::getenv("USER_AGENT");
   if(USER_AGENT != nullptr) {
-    std::cout << "User Agent: '" << USER_AGENT << "'\n";
     curl_easy_setopt(curl.get(), CURLOPT_USERAGENT, USER_AGENT); // Set the custom user agent (required for api.weather.gov)
   }
 
