@@ -36,7 +36,7 @@ std::optional<std::string> getWeather(std::pair<double, double> coordinates) {
   //    Use the returned ID to make a request to observations/latest
   //    Parse data from current conditions
   // GET request to gridpointsURL/forecast/hourly
-  getStationsData(stationsURL, handle);
+  getClosestStation(stationsURL, handle);
   getForecastData(forecastURL, handle);
   return std::nullopt;
 };
@@ -46,7 +46,7 @@ std::optional<std::pair<std::string, std::string>> getPointsData(std::pair<doubl
   auto [result, data, headers] = cURL::getData(url, curl);
   
   if(result != cURL::Result::SUCCESS) {
-    std::cerr << "ERROR: cURL request failes.\n";
+    std::cerr << "ERROR: cURL request failed.\n";
     return std::nullopt;
   }
   if(data.empty()) {
@@ -72,28 +72,52 @@ std::optional<std::pair<std::string, std::string>> getPointsData(std::pair<doubl
   return std::nullopt;
 }
 
-void getStationsData(const std::string& stationsURL, cURL::Handle& curl) {
+void getCurrentConditions(std::string stationID, cURL::Handle& curl) {
+  // Make an HTTTP request
+  // Parse the data for current conditions
+
+}
+
+void getClosestStation(const std::string& stationsURL, cURL::Handle& curl) {
+  // Get stations data
+  auto stationsRet = getStationsData(stationsURL, curl);
+  if(!stationsRet.has_value()) {
+    std::cerr << "ERROR: Stations request request failed.\n";
+    return;
+  }
+  Json::Value parsedData = *stationsRet;
+  // Enter into the 'features' (stations) array
+  const Json::Value& stations = parsedData["features"];
+  // Iterate through each station
+  for(const auto& station : stations) {
+  
+  }
+  // Return the closest station's ID
+}
+
+std::optional<Json::Value> getStationsData(const std::string& stationsURL, cURL::Handle& curl) {
   auto [result, data, headers] = cURL::getData(stationsURL, curl);
   if(result != cURL::Result::SUCCESS) {
-    std::cerr << "ERROR: cURL request failes.\n";
-    return;
+    std::cerr << "ERROR: cURL request failed.\n";
+    return std::nullopt;
   }
   if(data.empty()) {
     std::cerr << "ERROR: Retrieved stations data string is empty.\n";
-    return;
+    return std::nullopt;
   }
   std::string contentType = cURL::getContentType(headers);
   if(contentType.find("application/geo+json") == std::string::npos) {
     std::cerr << "ERROR: API returned unexpected format.\n";
-    return;
+    return std::nullopt;
   }
-  std::cout << "Station data: " << data << '\n';
+  // Parse the stations data
+  return JSON::parseData(data);
 }
 
 void getForecastData(const std::string& forecastURL, cURL::Handle& curl) {
   auto [result, data, headers] = cURL::getData(forecastURL, curl);
   if(result != cURL::Result::SUCCESS) {
-    std::cerr << "ERROR: cURL request failes.\n";
+    std::cerr << "ERROR: cURL request failed.\n";
     return;
   }
   if(data.empty()) {
@@ -105,5 +129,5 @@ void getForecastData(const std::string& forecastURL, cURL::Handle& curl) {
     std::cerr << "ERROR: API returned unexpected format.\n";
     return;
   }
-  std::cout << "Forecast data: " << data << '\n';
+  //std::cout << "Forecast data: " << data << '\n';
 }
