@@ -14,6 +14,7 @@
 #include "data.h"
 #include "weather.h"
 #include <json/value.h>
+#include <limits>
 #include <string>
 #include <utility>
 #include <iostream>
@@ -88,12 +89,17 @@ std::optional<std::string> getClosestStation(const std::string& stationsURL, cUR
   // Enter into the 'features' (stations) array
   const Json::Value& stations = parsedData["features"];
   std::string closestStation { "" };
+//  double minDistance = std::numeric_limits<double>::max();
   // Iterate through each station
   for(const auto& station : stations) {
+    std::string stationID = station["properties"]["stationIdentifier"].asString();
+    const Json::Value coordinates = station["geometry"]["coordinates"];
+    double stationLat = coordinates[1].asDouble();
+    double stationLong = coordinates[0].asDouble();
+    std::cout << '\n' << stationID << " (" << stationLat << ", " << stationLong << ')';
     // Calculate the distance from our current coordinates
     // We can outsource this to another function using the haversine equation
     // Store the ID with the smallest distance value
-  
   }
 
   // Return the closest station's ID
