@@ -1,16 +1,3 @@
-// TODO:
-// getWeather should return both a current state and forecast objects
-//  NEED TO CREATE A WEATHER OBJECT
-// Function to parse list of stations retrieved via another GET request to observationStations URL
-  // Extract each stations ID and coordinates
-  // Should be stored in a local array/vector
-// Function to calculate distance between two points to find closest station HAVERSINE formula
-// Function to find the closest station
-  // Loop through each station stored in the array, using the distance formula to find the closest
-// Function to get the latest observations from the closest station
-// Function to parse conditions, temp, etc from latest observations
-// Function to parse hourly forecast from gridpoints object
-
 #include "data.h"
 #include "location.h"
 #include "weather.h"
@@ -29,10 +16,15 @@ std::optional<std::string> getWeather(const std::pair<double, double>& coordinat
     return std::nullopt;
   }
   auto [stationsURL, forecastURL] = *pointsRet;
-  
-  getCurrentConditions(stationsURL, coordinates, handle);
-  //getForecastData(forecastURL, handle);
-  return std::nullopt;
+  auto conditionsRet = getCurrentConditions(stationsURL, coordinates, handle);
+  if(!conditionsRet.has_value()) {
+    std::cerr << "ERROR: Failed to retrieve data for given station.\n";
+    return std::nullopt;
+  }
+  auto [jsonText, jsonClass] = *conditionsRet;
+  std::string tooltip{ "" };
+  //tooltip = getForecastData(forecastURL, handle);
+  return { "{\"text\":\"" + jsonText + "\",\"class\":\"" + jsonClass + "\",\"tooltip\":\"" + tooltip + "\"}" };
 };
 
 std::optional<std::pair<std::string, std::string>> getPointsData(const std::pair<double, double>& coordinates, cURL::Handle& curl){
@@ -66,23 +58,30 @@ std::optional<std::pair<std::string, std::string>> getPointsData(const std::pair
   return std::nullopt;
 }
 
-void getCurrentConditions(const std::string& stationsURL, const std::pair<double,double> coordinates, cURL::Handle& curl) {
-  // Get the closest station ID
+std::optional<std::pair<std::string, std::string>> getCurrentConditions(const std::string& stationsURL, const std::pair<double,double> coordinates, cURL::Handle& curl) {
   auto closestRet = getClosestStation(stationsURL, coordinates, curl);
   if(!closestRet.has_value())
-    return;
+    return std::nullopt;
   std::string stationID = *closestRet;
   std::string conditionsURL { "https://api.weather.gov/stations/" + stationID + "/observations/latest" };
   auto [result, data, headers] = cURL::getData(conditionsURL, curl);
   if(result != cURL::Result::SUCCESS) {
     std::cerr << "ERROR: cURL request failed.\n";
-    return;
+    return std::nullopt;
   }
-  std::cout << data;
-  // TODO:
-  // Need to create a condition/state object
-  // Parse JSON to extract members into object
-  // Need to create a forecast object (Or possibly a hash map of conditions/states)
+  if(data.empty()) {
+    std::cerr << "ERROR: Retrieved points data string is empty.\n";
+    return std::nullopt;
+  }
+  std::string contentType = cURL::getContentType(headers);
+  if(contentType.find("application/geo+json") == std::string::npos) {
+    std::cerr << "ERROR: API returned unexpected format.\n";
+    return std::nullopt;
+  }
+
+  Json::Value parsedData = JSON::parseData(data);
+  Weather::State currentState(parsedData);
+  return currentState.barFormat();
 }
 
 std::optional<std::string> getClosestStation(const std::string& stationsURL, const std::pair<double,double> coordinates, cURL::Handle& curl) {
@@ -152,5 +151,4 @@ void getForecastData(const std::string& forecastURL, cURL::Handle& curl) {
     std::cerr << "ERROR: API returned unexpected format.\n";
     return;
   }
-  //std::cout << "Forecast data: " << data << '\n';
 }
