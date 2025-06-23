@@ -1,6 +1,5 @@
 #include "data.h"
 #include <ctime>
-#include <iostream>
 #include <string>
 #include <vector>
 #include <tuple>
@@ -162,3 +161,15 @@ Json::Value parseData(const std::string& jsonData) {
   return root; // Return the parsed root of objects
 }
 } // namespace JSON
+
+double ctof(double degreesC) {
+  return degreesC * (9.0 / 5.0) + 32;
+}
+
+double kmtomi(double kilometers) {
+  return kilometers * (.062137);
+}
+
+double patoin(double pascals) {
+  return pascals * (.0040146307866177);
+}

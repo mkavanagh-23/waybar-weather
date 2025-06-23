@@ -1,5 +1,6 @@
 #include "data.h"
 #include "location.h"
+#include <cmath>
 #include <string>
 #include <iostream>
 #include <optional>
@@ -61,4 +62,19 @@ std::optional<Location> getLocation() {
     std::cerr << "ERROR: API returned unexpected format (" << contentType << ").\n";
     return std::nullopt;
   }
+} 
+
+// Calculate distance between two lat/lon points using Haversine formula
+// Haversine calculates distances on a sphere
+double haversineDistance(double lat1, double long1, double lat2, double long2) {
+  const double R = 6371.0; // Earth's radius in kilometers
+  double lat1Rad = lat1 * M_PI / 180.0;
+  double lat2Rad = lat2 * M_PI / 180.0;
+  double deltaLat = (lat2 - lat1) * M_PI / 180.0;
+  double deltaLon = (long2 - long1) * M_PI / 180.0;
+
+  double a = sin(deltaLat / 2.0) * sin(deltaLat / 2.0) + cos(lat1Rad) * cos(lat2Rad) * sin(deltaLon / 2.0) * sin(deltaLon / 2.0);
+  double c = 2.0 * atan2(sqrt(a), sqrt(1 - a));    
+  
+  return R * c;
 }

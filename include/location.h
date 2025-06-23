@@ -24,5 +24,6 @@ public:
 Location parseLocation(const Json::Value& parsedData);
 
 std::optional<Location> getLocation();
+double haversineDistance(double lat1, double long1, double lat2, double long2);
 
 #endif

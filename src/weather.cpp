@@ -12,6 +12,7 @@
 // Function to parse hourly forecast from gridpoints object
 
 #include "data.h"
+#include "location.h"
 #include "weather.h"
 #include <json/value.h>
 #include <limits>
@@ -28,9 +29,8 @@ std::optional<std::string> getWeather(const std::pair<double, double>& coordinat
     return std::nullopt;
   }
   auto [stationsURL, forecastURL] = *pointsRet;
-  std::cout << "Stations URL: " << stationsURL << '\n' << "Forecast URL: " << forecastURL << '\n';
   
-  getCurrentConditions(stationsURL, handle);
+  getCurrentConditions(stationsURL, coordinates, handle);
   //getForecastData(forecastURL, handle);
   return std::nullopt;
 };
@@ -66,19 +66,26 @@ std::optional<std::pair<std::string, std::string>> getPointsData(const std::pair
   return std::nullopt;
 }
 
-void getCurrentConditions(const std::string& stationsURL, cURL::Handle& curl) {
+void getCurrentConditions(const std::string& stationsURL, const std::pair<double,double> coordinates, cURL::Handle& curl) {
   // Get the closest station ID
-  auto closestRet = getClosestStation(stationsURL, curl);
+  auto closestRet = getClosestStation(stationsURL, coordinates, curl);
   if(!closestRet.has_value())
     return;
   std::string stationID = *closestRet;
-
-  // Make an HTTTP request for the closest station
-  // Parse the data for current conditions
-
+  std::string conditionsURL { "https://api.weather.gov/stations/" + stationID + "/observations/latest" };
+  auto [result, data, headers] = cURL::getData(conditionsURL, curl);
+  if(result != cURL::Result::SUCCESS) {
+    std::cerr << "ERROR: cURL request failed.\n";
+    return;
+  }
+  std::cout << data;
+  // TODO:
+  // Need to create a condition/state object
+  // Parse JSON to extract members into object
+  // Need to create a forecast object (Or possibly a hash map of conditions/states)
 }
 
-std::optional<std::string> getClosestStation(const std::string& stationsURL, cURL::Handle& curl) {
+std::optional<std::string> getClosestStation(const std::string& stationsURL, const std::pair<double,double> coordinates, cURL::Handle& curl) {
   // Get stations data
   auto stationsRet = getStationsData(stationsURL, curl);
   if(!stationsRet.has_value()) {
@@ -89,21 +96,26 @@ std::optional<std::string> getClosestStation(const std::string& stationsURL, cUR
   // Enter into the 'features' (stations) array
   const Json::Value& stations = parsedData["features"];
   std::string closestStation { "" };
-//  double minDistance = std::numeric_limits<double>::max();
+  double minDistance = std::numeric_limits<double>::max();
   // Iterate through each station
   for(const auto& station : stations) {
     std::string stationID = station["properties"]["stationIdentifier"].asString();
-    const Json::Value coordinates = station["geometry"]["coordinates"];
-    double stationLat = coordinates[1].asDouble();
-    double stationLong = coordinates[0].asDouble();
-    std::cout << '\n' << stationID << " (" << stationLat << ", " << stationLong << ')';
+    const Json::Value stationCoordinates = station["geometry"]["coordinates"];
+    double stationLat = stationCoordinates[1].asDouble();
+    double stationLong = stationCoordinates[0].asDouble();
     // Calculate the distance from our current coordinates
-    // We can outsource this to another function using the haversine equation
-    // Store the ID with the smallest distance value
+    const auto& [ latitude, longitude ] = coordinates;
+    double distance = haversineDistance(latitude, longitude, stationLat, stationLong);
+    if(distance < minDistance) {
+      minDistance = distance;
+      closestStation = stationID;
+    }
   }
-
   // Return the closest station's ID
-  return closestStation;
+  if(!closestStation.empty())
+    return closestStation;
+  else
+    return std::nullopt;
 }
 
 std::optional<Json::Value> getStationsData(const std::string& stationsURL, cURL::Handle& curl) {

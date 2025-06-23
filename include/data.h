@@ -52,4 +52,9 @@ std::string getContentType(const std::vector<std::string>& headers);
 namespace JSON {
 Json::Value parseData(const std::string& jsonData);
 } // namespace JSON
+
+double ctof(double degreesC);
+double kmtomi(double kilometers);
+double patoin(double pascals);
+
 #endif
