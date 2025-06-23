@@ -1,6 +1,7 @@
 #ifndef DATA_H
 #define DATA_H
 
+#include <chrono>
 #include <curl/curl.h>
 #include <json/json.h>
 #include <string>
@@ -56,5 +57,6 @@ Json::Value parseData(const std::string& jsonData);
 double ctof(double degreesC);
 double kmtomi(double kilometers);
 double patoin(double pascals);
+std::optional<std::chrono::zoned_time<std::chrono::seconds>> utcToLocal(const std::string& utcTime);
 
 #endif

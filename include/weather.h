@@ -2,6 +2,7 @@
 #define WEATHER_H
 
 #include "data.h"
+#include <chrono>
 #include <json/value.h>
 #include <optional>
 #include <string>
@@ -22,6 +23,7 @@ public:
   double barPressureIn{ 0.0 };
   double windDegree{ 0 };
   double windSpeedMph{ 0.0 };
+  std::chrono::zoned_time<std::chrono::seconds> timeStamp;
 
   State(const Json::Value& stationState)
   {
@@ -78,15 +80,22 @@ public:
         heatIndexF = ctof(degC);
       }
     }
+    if(stationState["properties"].isMember("timestamp")) {
+      const auto& value = stationState["properties"]["timestamp"].asString();
+      auto timeRet = utcToLocal(value);
+      if(timeRet.has_value()) {
+        timeStamp = *timeRet;
+      }
+    }
   }
-  std::pair<std::string, std::string> barFormat();
+  std::tuple<std::string, std::string, std::string> barFormat();
 }; // class State
 }   // namespace Weather
 
 
 std::optional<std::string> getWeather(const std::pair<double, double>& coordinates);
 std::optional<std::pair<std::string, std::string>> getPointsData(const std::pair<double, double>& coordinates, cURL::Handle& curl);
-std::optional<std::pair<std::string, std::string>> getCurrentConditions(const std::string& stationsURL, const std::pair<double,double> coordinates, cURL::Handle& curl);
+std::optional<std::tuple<std::string, std::string, std::string>> getCurrentConditions(const std::string& stationsURL, const std::pair<double,double> coordinates, cURL::Handle& curl);
 std::optional<std::string> getClosestStation(const std::string& stationsURL, const std::pair<double,double> coordinates, cURL::Handle& curl);
 std::optional<Json::Value> getStationsData(const std::string& stationsURL, cURL::Handle& curl);
 void getForecastData(const std::string& forecastURL, cURL::Handle& curl);

@@ -1,9 +1,11 @@
 #include "data.h"
+#include <chrono>
 #include <ctime>
 #include <string>
 #include <iostream>
 #include <vector>
 #include <tuple>
+#include <regex>
 #include <cstdlib>
 #include <curl/curl.h>
 #include <json/json.h>
@@ -48,7 +50,6 @@ std::tuple<Result, std::string, std::vector<std::string>> getData(const std::str
   // Check for user agent
   const char* USER_AGENT = std::getenv("WAYBAR_WEATHER_USER_AGENT");
   if(USER_AGENT != nullptr) {
-    std::cout << USER_AGENT << '\n';
     curl_easy_setopt(curl.get(), CURLOPT_USERAGENT, USER_AGENT); // Set the custom user agent (required for api.weather.gov)
   }
 
@@ -174,4 +175,33 @@ double kmtomi(double kilometers) {
 
 double patoin(double pascals) {
   return pascals * (.0040146307866177);
+}
+
+std::optional<std::chrono::zoned_time<std::chrono::seconds>> utcToLocal(const std::string& utcTime){
+  using namespace std::chrono;
+  // Regex to parse: "2025-06-23T15:54:00+00:00"
+  std::regex pattern(R"((\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)(?:\+00:00|Z))");
+  std::smatch matches;
+
+  if (!std::regex_match(utcTime, matches, pattern)) {
+    std::cerr << "Invalid ISO 8601 UTC format: " + utcTime << '\n';
+    return std::nullopt;
+  }
+
+  // Extract components
+  int parsedYear  = std::stoi(matches[1]);
+  int parsedMonth = std::stoi(matches[2]);
+  int parsedDay   = std::stoi(matches[3]);
+  int parsedHour  = std::stoi(matches[4]);
+  int parsedMin   = std::stoi(matches[5]);
+  int parsedSec   = std::stoi(matches[6]);
+
+  // Build sys_seconds (UTC)
+  auto ymd = year_month_day{ year{parsedYear}, month{static_cast<unsigned>(parsedMonth)}, day{static_cast<unsigned>(parsedDay)} };
+  sys_seconds utc_time = sys_days{ymd} + hours{parsedHour} + minutes{parsedMin} + seconds{parsedSec};
+
+  // Convert to local timezone
+  zoned_time local_time{current_zone(), utc_time};
+
+  return local_time;
 }

@@ -1,16 +1,34 @@
 #include "data.h"
 #include "location.h"
 #include "weather.h"
+#include <cmath>
+#include <format>
+#include <iomanip>
 #include <json/value.h>
 #include <limits>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <iostream>
 #include <optional>
+
+// TODO:
+// Add a map structure to map weather descriptions to nerdfont icons
+// Expand out tooltip details
+// Redefine JSON class to reflect different color states for the bar, cool to hot temps
+// Fetch forecast URL and open forecast in-browser on-click
   
 // Returns jsonText, jsonClass
-std::pair<std::string, std::string> Weather::State::barFormat() {
-  return std::make_pair(description, "active");
+std::tuple<std::string, std::string, std::string> Weather::State::barFormat() {
+  double roundedTemp = std::round(tempF * 10.0) / 10.0;    // Round to nearest tenths
+  std::ostringstream tempStream;    // And truncate the value for display
+  tempStream << std::fixed << std::setprecision(1) << roundedTemp;
+  std::string temperature = tempStream.str();
+  std::string text = "  " + temperature +  "°F";
+  std::ostringstream timeStream;
+  timeStream << std::format("{:%F %T %Z}", timeStamp);
+  std::string tooltip{ timeStream.str() + "\\n" + description };
+  return std::make_tuple(text, "active", tooltip);
 }
 
 std::optional<std::string> getWeather(const std::pair<double, double>& coordinates) {
@@ -26,10 +44,9 @@ std::optional<std::string> getWeather(const std::pair<double, double>& coordinat
     std::cerr << "ERROR: Failed to retrieve data for given station.\n";
     return std::nullopt;
   }
-  auto [jsonText, jsonClass] = *conditionsRet;
-  std::string tooltip{ "" };
+  auto [jsonText, jsonClass, jsonTooltip] = *conditionsRet;
   //tooltip = getForecastData(forecastURL, handle);
-  return { "{\"text\":\"" + jsonText + "\",\"class\":\"" + jsonClass + "\",\"tooltip\":\"" + tooltip + "\"}" };
+  return { "{\"text\":\"" + jsonText + "\",\"class\":\"" + jsonClass + "\",\"tooltip\":\"" + jsonTooltip + "\"}" };
 };
 
 std::optional<std::pair<std::string, std::string>> getPointsData(const std::pair<double, double>& coordinates, cURL::Handle& curl){
@@ -63,7 +80,7 @@ std::optional<std::pair<std::string, std::string>> getPointsData(const std::pair
   return std::nullopt;
 }
 
-std::optional<std::pair<std::string, std::string>> getCurrentConditions(const std::string& stationsURL, const std::pair<double,double> coordinates, cURL::Handle& curl) {
+std::optional<std::tuple<std::string, std::string, std::string>> getCurrentConditions(const std::string& stationsURL, const std::pair<double,double> coordinates, cURL::Handle& curl) {
   auto closestRet = getClosestStation(stationsURL, coordinates, curl);
   if(!closestRet.has_value())
     return std::nullopt;
