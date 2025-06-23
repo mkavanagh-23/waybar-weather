@@ -1,6 +1,7 @@
 #include "data.h"
 #include <ctime>
 #include <string>
+#include <iostream>
 #include <vector>
 #include <tuple>
 #include <cstdlib>
@@ -45,8 +46,9 @@ std::tuple<Result, std::string, std::vector<std::string>> getData(const std::str
   curl_easy_setopt(curl.get(), CURLOPT_SSL_VERIFYPEER, 0L); // Optional, depending on your SSL setup
   
   // Check for user agent
-  const char* USER_AGENT = std::getenv("USER_AGENT");
+  const char* USER_AGENT = std::getenv("WAYBAR_WEATHER_USER_AGENT");
   if(USER_AGENT != nullptr) {
+    std::cout << USER_AGENT << '\n';
     curl_easy_setopt(curl.get(), CURLOPT_USERAGENT, USER_AGENT); // Set the custom user agent (required for api.weather.gov)
   }
 

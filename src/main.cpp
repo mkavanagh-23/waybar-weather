@@ -3,8 +3,24 @@
 #include <cstdlib>
 #include <json/value.h>
 #include <iostream>
+#include <fstream>
 #include <optional>
+#include <string>
 #include <utility>
+
+const std::string TEMP_FILE_PATH{ "/tmp/waybar-weather.json" };
+
+bool writeToFile(const std::string& contents) {
+  std::ofstream file(TEMP_FILE_PATH);
+  if(!file) {
+    std::cerr << "ERROR: Failed to open output JSON for writing.\n";
+    return false;
+  }
+  file << contents;
+  file.close();
+  std::cout << "Weather data successfully written to tmp file: '" << TEMP_FILE_PATH << "'\n";
+  return true;
+}
 
 int main() {
   std::optional<Location> locationRet = getLocation();
@@ -14,14 +30,13 @@ int main() {
   }
   Location location = *locationRet;
   auto coordinates = std::make_pair(location.latitude, location.longitude);
-  getWeather(coordinates);
-
-  // TODO:
-  // Get the currrent weather
-    // Research open weather APIs for an option that gives both current conditions and hourly forecast
-  // Get the upcoming forecast
-  // Build json string and write to cache file
-
+  auto weatherRet = getWeather(coordinates);
+  if(!weatherRet.has_value()){
+    std::cerr << "Error: Failed to retrieve weather data.\n";
+    return EXIT_FAILURE;
+  }
+  std::string weatherStr = *weatherRet;
+  writeToFile(weatherStr);
   return EXIT_SUCCESS;
 }
 

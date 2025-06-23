@@ -7,6 +7,11 @@
 #include <utility>
 #include <iostream>
 #include <optional>
+  
+// Returns jsonText, jsonClass
+std::pair<std::string, std::string> Weather::State::barFormat() {
+  return std::make_pair(description, "active");
+}
 
 std::optional<std::string> getWeather(const std::pair<double, double>& coordinates) {
   cURL::Handle handle;  // This handle to be utilized for all subsequent function calls
