@@ -32,6 +32,9 @@ public:
     }
     if(stationState["properties"].isMember("textDescription")) {
       description = stationState["properties"]["textDescription"].asString();
+      if(description.empty()){
+        description = "Clear";
+      }
     }
     if(stationState["properties"].isMember("temperature")) {
       const auto& value = stationState["properties"]["temperature"]["value"];
