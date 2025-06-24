@@ -24,10 +24,25 @@ std::tuple<std::string, std::string, std::string> Weather::State::barFormat() {
   std::ostringstream tempStream;    // And truncate the value for display
   tempStream << std::fixed << std::setprecision(1) << roundedTemp;
   std::string temperature = tempStream.str();
-  std::string text = "  " + temperature +  "°F";
+  std::string text = "  " + temperature + "°F";
+  
+  // Create the tooltip
   std::ostringstream timeStream;
   timeStream << std::format("{:%F %T %Z}", timeStamp);
-  std::string tooltip{ timeStream.str() + "\\n" + description };
+  std::string tooltip{ description };
+  if(!(windChillF == INVALID_TEMP)) {
+    std::ostringstream windChillStream;
+    windChillStream << std::fixed << std::setprecision(1) << std::round(windChillF * 10.0) / 10;
+    tooltip += "\\nFeels Like: " + windChillStream.str() + "°F";;  
+  } else if(!(heatIndexF == INVALID_TEMP)) {
+    std::ostringstream heatIndexStream;
+    heatIndexStream << std::fixed << std::setprecision(1) << std::round(heatIndexF * 10.0) / 10;
+    tooltip += "\\nFeels Like: " + heatIndexStream.str() + "°F";;  
+  }
+  tooltip += "\\nHumidity: " + std::to_string(humidPct) + "%";
+  tooltip += "\\nPressure: " + std::to_string(barPressureIn) + " in.";
+  tooltip += "\\nWind: " + std::to_string(windSpeedMph) + " mph (" + std::to_string(windDegree) + "°)";
+  tooltip += "\\nUpdated: " + timeStream.str();
   return std::make_tuple(text, "active", tooltip);
 }
 

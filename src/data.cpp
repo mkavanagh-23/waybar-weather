@@ -198,7 +198,7 @@ std::optional<std::chrono::zoned_time<std::chrono::seconds>> utcToLocal(const st
 
   // Build sys_seconds (UTC)
   auto ymd = year_month_day{ year{parsedYear}, month{static_cast<unsigned>(parsedMonth)}, day{static_cast<unsigned>(parsedDay)} };
-  sys_seconds utc_time = sys_days{ymd} + hours{parsedHour} + minutes{parsedMin} + seconds{parsedSec};
+  sys_seconds utc_time = sys_days{ymd} + hours{parsedHour + 1} + minutes{parsedMin} + seconds{parsedSec};
 
   // Convert to local timezone
   zoned_time local_time{current_zone(), utc_time};
