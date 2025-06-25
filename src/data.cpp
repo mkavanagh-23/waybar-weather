@@ -170,11 +170,11 @@ double ctof(double degreesC) {
 }
 
 double kmtomi(double kilometers) {
-  return kilometers * (.062137);
+  return kilometers * (.621371);
 }
 
 double patoin(double pascals) {
-  return pascals * (.0040146307866177);
+  return pascals / 3386.389;
 }
 
 std::optional<std::chrono::zoned_time<std::chrono::seconds>> utcToLocal(const std::string& utcTime){
@@ -198,7 +198,7 @@ std::optional<std::chrono::zoned_time<std::chrono::seconds>> utcToLocal(const st
 
   // Build sys_seconds (UTC)
   auto ymd = year_month_day{ year{parsedYear}, month{static_cast<unsigned>(parsedMonth)}, day{static_cast<unsigned>(parsedDay)} };
-  sys_seconds utc_time = sys_days{ymd} + hours{parsedHour + 1} + minutes{parsedMin} + seconds{parsedSec};
+  sys_seconds utc_time = sys_days{ymd} + hours{parsedHour} + minutes{parsedMin} + seconds{parsedSec};
 
   // Convert to local timezone
   zoned_time local_time{current_zone(), utc_time};

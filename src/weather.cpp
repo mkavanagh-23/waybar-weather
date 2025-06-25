@@ -41,7 +41,7 @@ std::tuple<std::string, std::string, std::string> Weather::State::barFormat() {
   }
   tooltip += "\\nHumidity: " + std::to_string(humidPct) + "%";
   tooltip += "\\nPressure: " + std::to_string(barPressureIn) + " in.";
-  tooltip += "\\nWind: " + std::to_string(windSpeedMph) + " mph (" + std::to_string(windDegree) + "°)";
+  tooltip += "\\nWind: " + std::to_string(windSpeedMph) + " mph  " + windDirection;
   tooltip += "\\nUpdated: " + timeStream.str();
   return std::make_tuple(text, "active", tooltip);
 }

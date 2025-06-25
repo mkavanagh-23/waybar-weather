@@ -21,7 +21,7 @@ public:
   double windChillF{ INVALID_TEMP };
   double heatIndexF{ INVALID_TEMP };
   double barPressureIn{ 0.0 };
-  double windDegree{ 0 };
+  std::string windDirection{ "" };
   double windSpeedMph{ 0.0 };
   std::chrono::zoned_time<std::chrono::seconds> timeStamp;
 
@@ -59,7 +59,41 @@ public:
     if(stationState["properties"].isMember("windDirection")) {
       const auto& value = stationState["properties"]["windDirection"]["value"];
       if(!value.isNull()) {
-        windDegree = value.asDouble();
+        double windDegree = value.asDouble();
+        if (windDegree >= 345.0 || windDegree < 15.0)
+          windDirection = "󰁅";
+        else if (windDegree >= 15.0 && windDegree < 30.0)
+          windDirection = "󱞥";
+        else if (windDegree >= 30.0 && windDegree < 60.0)
+          windDirection = "󰁂";
+        else if (windDegree >= 60.0 && windDegree < 75.0)
+          windDirection = "󱞡";
+        else if (windDegree >= 75.0 && windDegree < 105.0)
+          windDirection = "󰁍";
+        else if (windDegree >= 105.0 && windDegree < 120.0)
+          windDirection = "󱞽";
+        else if (windDegree >= 120.0 && windDegree < 150.0)
+          windDirection = "󰁛";
+        else if (windDegree >= 150.0 && windDegree < 165.0)
+          windDirection = "󱞧";
+        else if (windDegree >= 165.0 && windDegree < 195.0)
+          windDirection = "󰁝";
+        else if (windDegree >= 195.0 && windDegree < 210.0)
+          windDirection = "󱞫";
+        else if (windDegree >= 210.0 && windDegree < 240.0)
+          windDirection = "󰁜";
+        else if (windDegree >= 240.0 && windDegree < 255.0)
+          windDirection = "󱞿";
+        else if (windDegree >= 255.0 && windDegree < 285.0)
+          windDirection = "󰁔";
+        else if (windDegree >= 285.0 && windDegree < 300.0)
+          windDirection = "󱞣";
+        else if (windDegree >= 300.0 && windDegree < 330.0)
+          windDirection = "󰁃";
+        else if (windDegree >= 330.0 && windDegree < 345.0)
+          windDirection = "󱞩";
+        else
+          windDirection = "!!ERR!!";
       }
     }
     if(stationState["properties"].isMember("windSpeed")) {
