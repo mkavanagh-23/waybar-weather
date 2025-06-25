@@ -1,6 +1,8 @@
 #include "data.h"
 #include <chrono>
 #include <ctime>
+#include <fstream>
+#include <ios>
 #include <string>
 #include <iostream>
 #include <vector>
@@ -9,6 +11,30 @@
 #include <cstdlib>
 #include <curl/curl.h>
 #include <json/json.h>
+
+bool writeToFile(const std::string& contents, const std::string& filepath) {
+  std::ofstream file(filepath);
+  if(!file) {
+    std::cerr << "ERROR: Failed to open output JSON for writing.\n";
+    return false;
+  }
+  file << contents;
+  file.close();
+  std::cout << "Data successfully written to file: '" << filepath << "'\n";
+  return true;
+}
+
+bool appendToFile(const std::string& contents, const std::string& filepath) {
+  std::ofstream file(filepath, std::ios::app);
+  if(!file) {
+    std::cerr << "ERROR: Failed to open output JSON for writing.\n";
+    return false;
+  }
+  file << contents;
+  file.close();
+  std::cout << "Data successfully written to file: '" << filepath << "'\n";
+  return true;
+}
 
 namespace cURL {
 

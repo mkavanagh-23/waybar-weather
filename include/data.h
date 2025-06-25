@@ -9,6 +9,8 @@
 #include <tuple>
 #include <ctime>
 
+bool writeToFile(const std::string& contents, const std::string& filepath);
+bool appendToFile(const std::string& contents, const std::string& filepath);
 
 namespace cURL {
 

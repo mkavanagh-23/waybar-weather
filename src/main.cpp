@@ -10,22 +10,11 @@
 
 const std::string TEMP_FILE_PATH{ "/tmp/waybar-weather.json" };
 
-bool writeToFile(const std::string& contents) {
-  std::ofstream file(TEMP_FILE_PATH);
-  if(!file) {
-    std::cerr << "ERROR: Failed to open output JSON for writing.\n";
-    return false;
-  }
-  file << contents;
-  file.close();
-  std::cout << "Weather data successfully written to tmp file: '" << TEMP_FILE_PATH << "'\n";
-  return true;
-}
 
 int main() {
   std::optional<Location> locationRet = getLocation();
   if(!locationRet.has_value()) {
-    std::cerr << "ERROR: Unable to retrieve location.";
+    std::cerr << "ERROR: Unable to retrieve location.\n";
     return EXIT_FAILURE;
   }
   Location location = *locationRet;
@@ -36,7 +25,7 @@ int main() {
     return EXIT_FAILURE;
   }
   std::string weatherStr = *weatherRet;
-  writeToFile(weatherStr);
+  writeToFile(weatherStr, TEMP_FILE_PATH);
   return EXIT_SUCCESS;
 }
 

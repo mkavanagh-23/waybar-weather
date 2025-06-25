@@ -35,6 +35,13 @@ public:
       if(description.empty()){
         description = "Clear";
       }
+      std::string descPath{""};
+      const char* homeDir = std::getenv("HOME");
+      if(homeDir) 
+        descPath = std::string(homeDir) + "/weather-descriptions.txt";
+      else 
+        descPath = "./weather-descriptions.txt";  // fallback to current directory
+      appendToFile({description + '\n'}, descPath);
     }
     if(stationState["properties"].isMember("temperature")) {
       const auto& value = stationState["properties"]["temperature"]["value"];
