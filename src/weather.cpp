@@ -15,6 +15,7 @@
 // TODO:
 // Add a map structure to map weather descriptions to nerdfont icons
 // Fetch forecast URL and open forecast in-browser on-click
+// https://forecast.weather.gov/MapClick.php?lat=$LATITUDE&lon=$LONGITUDE
   
 // Returns jsonText, jsonClass
 std::tuple<std::string, std::string, std::string> Weather::State::barFormat() {
