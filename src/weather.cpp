@@ -24,7 +24,7 @@ std::tuple<std::string, std::string, std::string> Weather::State::barFormat() {
   std::ostringstream tempStream;    // And truncate the value for display
   tempStream << std::fixed << std::setprecision(1) << roundedTemp;
   std::string temperature = tempStream.str();
-  std::string text = "  " + temperature + "°F";
+  std::string text = "  " + temperature + " 󰔅";
   
   // Create the tooltip
   std::ostringstream timeStream;
@@ -33,16 +33,22 @@ std::tuple<std::string, std::string, std::string> Weather::State::barFormat() {
   if(!(windChillF == INVALID_TEMP)) {
     std::ostringstream windChillStream;
     windChillStream << std::fixed << std::setprecision(1) << std::round(windChillF * 10.0) / 10;
-    tooltip += "\\nFeels Like: " + windChillStream.str() + "°F";;  
+    tooltip += "\\n󱩱  Feels Like: " + windChillStream.str() + " 󰔅";;  
   } else if(!(heatIndexF == INVALID_TEMP)) {
     std::ostringstream heatIndexStream;
     heatIndexStream << std::fixed << std::setprecision(1) << std::round(heatIndexF * 10.0) / 10;
-    tooltip += "\\nFeels Like: " + heatIndexStream.str() + "°F";;  
+    tooltip += "\\n󱣖  Feels Like: " + heatIndexStream.str() + " 󰔅";;  
   }
-  tooltip += "\\nHumidity: " + std::to_string(humidPct) + "%";
-  tooltip += "\\nPressure: " + std::to_string(barPressureIn) + " in.";
-  tooltip += "\\nWind: " + std::to_string(windSpeedMph) + " mph  " + windDirection;
-  tooltip += "\\nUpdated: " + timeStream.str();
+  std::ostringstream humidStream;
+  humidStream << std::fixed << std::setprecision(2) << (std::round(humidPct * 100.0) / 100.0);
+  tooltip += "\\n  Humidity: " + humidStream.str() + " 󰏰";
+  std::ostringstream pressStream;
+  pressStream << std::fixed << std::setprecision(2) << (std::round(barPressureIn * 100.0) / 100.0);
+  tooltip += "\\n  Pressure: " + pressStream.str() + " in. 󰁅";
+  std::ostringstream windStream;
+  windStream << std::fixed << std::setprecision(1) << (std::round(windSpeedMph * 10.0) / 10.0);
+  tooltip += "\\n  Wind: " + windStream.str() + " mph  " + windDirection;
+  tooltip += "\\n󰥔  " + timeStream.str();
   return std::make_tuple(text, "active", tooltip);
 }
 
