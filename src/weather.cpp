@@ -14,13 +14,25 @@
 
 // TODO:
 // Add a map structure to map weather descriptions to nerdfont icons
-// Expand out tooltip details
-// Redefine JSON class to reflect different color states for the bar, cool to hot temps
 // Fetch forecast URL and open forecast in-browser on-click
   
 // Returns jsonText, jsonClass
 std::tuple<std::string, std::string, std::string> Weather::State::barFormat() {
+  std::string color{ "" };
   double roundedTemp = std::round(tempF * 10.0) / 10.0;    // Round to nearest tenths
+  if(roundedTemp < 0) {
+    color = "blue";
+  } else if(roundedTemp < 32) {
+    color = "purple";
+  } else if(roundedTemp < 60) {
+    color = "yellow";
+  } else if(roundedTemp < 78) {
+    color = "orange";
+  } else if(roundedTemp < 90) {
+    color = "pink";
+  } else {
+    color = "red";
+  }
   std::ostringstream tempStream;    // And truncate the value for display
   tempStream << std::fixed << std::setprecision(1) << roundedTemp;
   std::string temperature = tempStream.str();
@@ -33,11 +45,11 @@ std::tuple<std::string, std::string, std::string> Weather::State::barFormat() {
   if(!(windChillF == INVALID_TEMP)) {
     std::ostringstream windChillStream;
     windChillStream << std::fixed << std::setprecision(1) << std::round(windChillF * 10.0) / 10;
-    tooltip += "\\n󱩱  Feels Like: " + windChillStream.str() + " 󰔅";;  
+    tooltip += "<span foreground='#92a2d5'>\\n󱩱  Feels Like: " + windChillStream.str() + " 󰔅</span>"; 
   } else if(!(heatIndexF == INVALID_TEMP)) {
     std::ostringstream heatIndexStream;
     heatIndexStream << std::fixed << std::setprecision(1) << std::round(heatIndexF * 10.0) / 10;
-    tooltip += "\\n󱣖  Feels Like: " + heatIndexStream.str() + " 󰔅";;  
+    tooltip += "<span foreground='#ea83a5'>\\n󱣖  Feels Like: " + heatIndexStream.str() + " 󰔅</span>";;  
   }
   std::ostringstream humidStream;
   humidStream << std::fixed << std::setprecision(2) << (std::round(humidPct * 100.0) / 100.0);
@@ -49,7 +61,7 @@ std::tuple<std::string, std::string, std::string> Weather::State::barFormat() {
   windStream << std::fixed << std::setprecision(1) << (std::round(windSpeedMph * 10.0) / 10.0);
   tooltip += "\\n  Wind: " + windStream.str() + " mph  " + windDirection;
   tooltip += "\\n󰥔  " + timeStream.str();
-  return std::make_tuple(text, "active", tooltip);
+  return std::make_tuple(text, color, tooltip);
 }
 
 std::optional<std::string> getWeather(const std::pair<double, double>& coordinates) {
