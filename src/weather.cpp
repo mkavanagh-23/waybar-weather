@@ -21,15 +21,15 @@
 std::tuple<std::string, std::string, std::string> Weather::State::barFormat() {
   std::string color{ "" };
   double roundedTemp = std::round(tempF * 10.0) / 10.0;    // Round to nearest tenths
-  if(roundedTemp < 0) {
+  if(roundedTemp < 0.0) {
     color = "blue";
-  } else if(roundedTemp < 32) {
+  } else if(roundedTemp < 32.0) {
     color = "purple";
-  } else if(roundedTemp < 60) {
+  } else if(roundedTemp < 60.0) {
     color = "yellow";
-  } else if(roundedTemp < 78) {
+  } else if(roundedTemp < 78.0) {
     color = "orange";
-  } else if(roundedTemp < 90) {
+  } else if(roundedTemp < 90.0) {
     color = "pink";
   } else {
     color = "red";
@@ -57,7 +57,7 @@ std::tuple<std::string, std::string, std::string> Weather::State::barFormat() {
   tooltip += "\\n  Humidity: " + humidStream.str() + " 󰏰";
   std::ostringstream pressStream;
   pressStream << std::fixed << std::setprecision(2) << (std::round(barPressureIn * 100.0) / 100.0);
-  tooltip += "\\n  Pressure: " + pressStream.str() + " in. 󰁅";
+  tooltip += "\\n  Pressure: " + pressStream.str() + " in.";
   std::ostringstream windStream;
   windStream << std::fixed << std::setprecision(1) << (std::round(windSpeedMph * 10.0) / 10.0);
   tooltip += "\\n  Wind: " + windStream.str() + " mph  " + windDirection;
