@@ -37,7 +37,21 @@ std::tuple<std::string, std::string, std::string> Weather::State::barFormat() {
   std::ostringstream tempStream;    // And truncate the value for display
   tempStream << std::fixed << std::setprecision(1) << roundedTemp;
   std::string temperature = tempStream.str();
-  std::string text = "  " + temperature + " 󰔅";
+  std::string text{""};
+  if(daytime){
+    if(stateIconsDay.contains(description)) {
+      text += stateIconsDay.at(description) + "  ";
+    } else {
+      text += "  ";
+    }
+  } else {
+    if(stateIconsNight.contains(description)) {
+      text += stateIconsNight.at(description) + "  ";
+    } else {
+      text += "  ";
+    }
+  }
+  text += temperature + " 󰔅";
   
   // Create the tooltip
   std::ostringstream timeStream;
@@ -136,7 +150,7 @@ std::optional<std::tuple<std::string, std::string, std::string>> getCurrentCondi
   }
 
   Json::Value parsedData = JSON::parseData(data);
-  Weather::State currentState(parsedData);
+  Weather::State currentState(parsedData, coordinates, curl);
   return currentState.barFormat();
 }
 

@@ -6,11 +6,44 @@
 #include <json/value.h>
 #include <optional>
 #include <string>
+#include <iostream>
+#include <unordered_map>
 #include <utility>
 
 namespace Weather {
 
 const double INVALID_TEMP { 5000 }; // Check for NULL values
+
+// TODO: Add more values as they come up
+const std::unordered_map<std::string, std::string> stateIconsDay{
+  {"Clear", ""},
+  {"Cloudy", ""},
+  {"Heavy Rain and Fog/Mist", ""},
+  {"Light Rain", ""},
+  {"Light Rain and Fog/Mist", ""},
+  {"Mostly Clear", ""},
+  {"Mostly Cloudy", "󰅟"},
+  {"Partly Cloudy", ""},
+  {"Rain and Fog/Mist", ""},
+  {"Thunderstorms", "󰖓"},
+  {"Thunderstorms and Rain", ""},
+  {"Thunderstorms and Rain and Fog/Mist", ""},
+};
+
+const std::unordered_map<std::string, std::string> stateIconsNight{
+  {"Clear", "󰖔"},
+  {"Cloudy", ""},
+  {"Heavy Rain and Fog/Mist", ""},
+  {"Light Rain", ""},
+  {"Light Rain and Fog/Mist", ""},
+  {"Mostly Clear", ""},
+  {"Mostly Cloudy", ""},
+  {"Partly Cloudy", ""},
+  {"Rain and Fog/Mist", ""},
+  {"Thunderstorms", ""},
+  {"Thunderstorms and Rain", ""},
+  {"Thunderstorms and Rain and Fog/Mist", ""},
+};
 
 class State {
 public:
@@ -24,9 +57,9 @@ public:
   std::string windDirection{ "" };
   double windSpeedMph{ 0.0 };
   std::chrono::zoned_time<std::chrono::seconds> timeStamp;
+  bool daytime{ false };
 
-  State(const Json::Value& stationState)
-  {
+  State(const Json::Value& stationState, const std::pair<double, double> coordinates, cURL::Handle& curl) {
     if(stationState["properties"].isMember("stationName")) {
       stationName = stationState["properties"]["stationName"].asString();
     }
@@ -129,6 +162,32 @@ public:
       auto timeRet = utcToLocal(value);
       if(timeRet.has_value()) {
         timeStamp = *timeRet;
+      }
+    }
+
+    std::string sunsetURL{ "https://api.sunrise-sunset.org/json?lat=" + std::to_string(coordinates.first) + "&lng=" + std::to_string(coordinates.second) + "&formatted=0" };
+    auto [result, data, headers] = cURL::getData(sunsetURL, curl);
+    if(result != cURL::Result::SUCCESS) {
+      std::cerr << "ERROR: cURL request failed.\n";
+    }
+    if(data.empty()) {
+      std::cerr << "ERROR: Sunset data string empty.\n";
+    }
+    Json::Value parsedData = JSON::parseData(data);
+    if(parsedData.isMember("results")) {
+      const Json::Value& results = parsedData["results"];
+      if(results.isMember("sunrise") && results.isMember("sunset")) {
+        // TODO: Parse SUNRISE time and compare to current time.
+        // Create separate icon arrays for daytime and nighttime, compare times to set the current daytime state
+        auto sunriseRet = utcToLocal(results["sunrise"].asString());
+        auto sunsetRet = utcToLocal(results["sunset"].asString());
+        if(sunriseRet.has_value() && sunsetRet.has_value()) {
+          std::chrono::zoned_time<std::chrono::seconds> timeSunrise = *sunriseRet;
+          std::chrono::zoned_time<std::chrono::seconds> timeSunset = *sunsetRet;
+          if((timeStamp.get_local_time() > timeSunrise.get_local_time()) || (timeStamp.get_local_time() < timeSunset.get_local_time())) {
+            daytime = true;
+          }
+        }
       }
     }
   }
