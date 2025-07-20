@@ -15,6 +15,9 @@ namespace Weather {
 const double INVALID_TEMP { 5000 }; // Check for NULL values
 
 // TODO: Add more values as they come up
+// "Fog/Mist"
+// "Haze"
+// "Light Drizzle"
 const std::unordered_map<std::string, std::string> stateIconsDay{
   {"Clear", ""},
   {"Cloudy", ""},
@@ -57,6 +60,8 @@ public:
   std::string windDirection{ "" };
   double windSpeedMph{ 0.0 };
   std::chrono::zoned_time<std::chrono::seconds> timeStamp;
+  std::chrono::zoned_time<std::chrono::seconds> timeSunrise;
+  std::chrono::zoned_time<std::chrono::seconds> timeSunset;
   bool daytime{ false };
 
   State(const Json::Value& stationState, const std::pair<double, double> coordinates, cURL::Handle& curl) {
@@ -182,15 +187,18 @@ public:
         auto sunriseRet = utcToLocal(results["sunrise"].asString());
         auto sunsetRet = utcToLocal(results["sunset"].asString());
         if(sunriseRet.has_value() && sunsetRet.has_value()) {
-          std::chrono::zoned_time<std::chrono::seconds> timeSunrise = *sunriseRet;
-          std::chrono::zoned_time<std::chrono::seconds> timeSunset = *sunsetRet;
-          if((timeStamp.get_local_time() > timeSunrise.get_local_time()) || (timeStamp.get_local_time() < timeSunset.get_local_time())) {
+          timeSunrise = *sunriseRet;
+          timeSunset = *sunsetRet;
+          if((timeStamp.get_local_time() > timeSunrise.get_local_time()) && (timeStamp.get_local_time() < timeSunset.get_local_time())) {
             daytime = true;
+          } else {
+            daytime = false;
           }
         }
       }
     }
   }
+
   std::tuple<std::string, std::string, std::string> barFormat();
 }; // class State
 }   // namespace Weather

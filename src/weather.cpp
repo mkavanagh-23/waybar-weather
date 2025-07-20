@@ -12,11 +12,6 @@
 #include <iostream>
 #include <optional>
 
-// TODO:
-// Add a map structure to map weather descriptions to nerdfont icons
-// Fetch forecast URL and open forecast in-browser on-click
-// https://forecast.weather.gov/MapClick.php?lat=$LATITUDE&lon=$LONGITUDE
-  
 // Returns jsonText, jsonClass
 std::tuple<std::string, std::string, std::string> Weather::State::barFormat() {
   std::string color{ "" };
@@ -55,7 +50,11 @@ std::tuple<std::string, std::string, std::string> Weather::State::barFormat() {
   
   // Create the tooltip
   std::ostringstream timeStream;
-  timeStream << std::format("{:%F %T %Z}", timeStamp);
+  timeStream << std::format("{:%T}", timeStamp);
+  std::ostringstream sunriseStream;
+  sunriseStream << std::format("{:%T}", timeSunrise);
+  std::ostringstream sunsetStream;
+  sunsetStream << std::format("{:%T}", timeSunset);
   std::string tooltip{ description };
   if(!(windChillF == INVALID_TEMP)) {
     std::ostringstream windChillStream;
@@ -75,7 +74,11 @@ std::tuple<std::string, std::string, std::string> Weather::State::barFormat() {
   std::ostringstream windStream;
   windStream << std::fixed << std::setprecision(1) << (std::round(windSpeedMph * 10.0) / 10.0);
   tooltip += "\\n  Wind: " + windStream.str() + " mph  " + windDirection;
-  tooltip += "\\n󰥔  " + timeStream.str();
+  tooltip += "\\n  Sunrise: " + sunriseStream.str();
+  tooltip += "\\n󰖚  Sunset: " + sunsetStream.str();
+  tooltip += "\\n󰥔  Updated: " + timeStream.str();
+  tooltip += "\\n(DEBUG) State: "; 
+  tooltip += (daytime) ? "Day" : "Night";
   return std::make_tuple(text, color, tooltip);
 }
 
